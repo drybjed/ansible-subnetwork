@@ -1,0 +1,57 @@
+---
+
+dependencies:
+
+  - role: debops.ifupdown
+    ifupdown_dependent_interfaces: '{{ subnetwork_ifupdown_prepend_interfaces + subnetwork_ifupdown_interfaces }}'
+
+  - role: debops.ferm
+
+galaxy_info:
+  author: 'Maciej Delmanowski'
+  description: 'Configure LAN with IPv4/NAT and IPv6 network support'
+  company: 'DebOps'
+  license: 'GNU General Public License v3'
+  min_ansible_version: '1.7.0'
+  platforms:
+  - name: Ubuntu
+    versions:
+    - precise
+    - quantal
+    - raring
+    - saucy
+    - trusty
+  - name: Debian
+    versions:
+    - wheezy
+    - jessie
+  categories:
+  - system
+  - networking
+
+ansigenome_info:
+  github_url: "https://github.com/debops/ansible-subnetwork"
+  git_branch: "master"
+  galaxy_id: ""
+
+  travis: True
+
+  license_url: 'https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)'
+
+  authors:
+    - name:  'Maciej Delmanowski'
+      url: ''
+      email: 'drybjed@gmail.com'
+      twitter: 'drybjed'
+      github: 'drybjed'
+
+  synopsis: |
+    `debops.subnetwork` is an Ansible role that creates and manages a local
+    network behind a bridge interface. It could also manage internal router
+    interfaces to a LAN. You can specify an IPv4 subnet and one or more
+    IPv6 subnets to configure it, the role will automatically configure basic
+    forwarding in any firewall and NAT for the IPv4 network.
+    
+    This role requires `ipaddr()` filter plugin which is available in
+    [debops/debops-playbooks](https://github.com/debops/debops-playbooks/).
+
