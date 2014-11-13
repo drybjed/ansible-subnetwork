@@ -26,12 +26,3 @@
     mode: '0644'
   notify: [ 'Restart ferm' ]
 
-- name: Configure firewall - INPUT
-  template:
-    src: 'etc/ferm/filter-input.d/subnetwork.conf.j2'
-    dest: '/etc/ferm/filter-input.d/subnetwork_{{ subnetwork_iface }}.conf'
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
-  notify: [ 'Restart ferm' ]
-
