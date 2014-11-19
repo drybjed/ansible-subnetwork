@@ -1,22 +1,5 @@
 ---
 
-- name: Configure sysctl
-  template:
-    src: 'etc/sysctl.d/30-subnetwork-forwarding.conf.j2'
-    dest: '/etc/sysctl.d/30-subnetwork-forwarding.conf'
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
-  notify: [ 'Reload sysctl' ]
-
-- name: Configure ifupdown pre-up script
-  template:
-    src: 'etc/network/if-pre-up.d/subnetwork-ipv6-accept_ra.j2'
-    dest: '/etc/network/if-pre-up.d/subnetwork-ipv6-accept_ra'
-    owner: 'root'
-    group: 'root'
-    mode: '0755'
-
 - name: Configure firewall - FORWARD / NAT
   template:
     src: 'etc/ferm/ferm.d/subnetwork.conf.j2'
