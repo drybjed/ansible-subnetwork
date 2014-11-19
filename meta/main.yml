@@ -6,6 +6,7 @@ dependencies:
     ifupdown_dependent_interfaces: '{{ subnetwork_ifupdown_prepend_interfaces + subnetwork_ifupdown_interfaces }}'
 
   - role: debops.ferm
+    ferm_forward: True
 
 galaxy_info:
   author: 'Maciej Delmanowski'
