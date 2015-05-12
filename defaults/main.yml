@@ -93,6 +93,7 @@ subnetwork_ifupdown_interfaces:
     filename: 'subnetwork_{{ subnetwork_iface }}_ipv6'
     weight: '40'
     auto: False
+    allow: False
     force: True
     options: |
       pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork_iface }}/accept_dad
