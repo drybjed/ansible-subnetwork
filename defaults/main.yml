@@ -31,9 +31,13 @@ subnetwork_ipv4_nat_masquerade: True
 # Network interface to the default IPv4 gateway
 subnetwork_ipv4_gateway: '{{ ansible_default_ipv4.interface | default("") }}'
 
-# Additional options passed to the ifupdown configuration for IPv4 network,
-# in YAML text block format
-subnetwork_ipv4_options: ''
+# Additional options passed to the ifupdown configuration for IPv4 network.
+# Each set of options for a particular network interface needs to be in
+# a separate dict key, in a YAML text block as a value.
+subnetwork_ipv4_options: {}
+# 'br2': |
+#   dns-nameservers 192.0.2.1
+#   dns-search example.org
 
 
 # ---- IPv6 network ----
@@ -50,9 +54,13 @@ subnetwork_ipv6: []
 # Network interface to the default IPv6 gateway
 subnetwork_ipv6_gateway: '{{ ansible_default_ipv6.interface | default("") }}'
 
-# Additional options passed to the ifupdown configuration for IPv6 network,
-# in YAML text block format
-subnetwork_ipv6_options: ''
+# Additional options passed to the ifupdown configuration for IPv6 network.
+# Each set of options for a particular network interface needs to be in
+# a separate dict key, in a YAML text block as a value.
+subnetwork_ipv6_options: {}
+# 'br2': |
+#   dns-nameservers 2001:db8:c001:51ed::1
+#   dns-search example.org
 
 
 # ---- ifupdown interface templates ----
@@ -82,8 +90,8 @@ subnetwork_ifupdown_interfaces:
       bridge_fd      0
       bridge_maxwait 0
       {% endif %}
-      {% if subnetwork_ipv4_options %}
-      {{ subnetwork_ipv4_options }}
+      {% if subnetwork_ipv4_options|d() and subnetwork_ipv4_options[subnetwork_iface]|d() %}
+      {{ subnetwork_ipv4_options[subnetwork_iface]|d() }}
       {% endif %}
 
     # IPv6 network
@@ -93,6 +101,7 @@ subnetwork_ifupdown_interfaces:
     filename: 'subnetwork_{{ subnetwork_iface }}_ipv6'
     weight: '40'
     auto: False
+    allow: False
     force: True
     options: |
       pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork_iface }}/accept_dad
@@ -105,7 +114,7 @@ subnetwork_ifupdown_interfaces:
       down /sbin/ip address del {{ subnet }} dev {{ subnetwork_iface }}
       {% endfor %}{% endif %}
       {% endif %}
-      {% if subnetwork_ipv6_options %}
-      {{ subnetwork_ipv6_options }}
+      {% if subnetwork_ipv6_options|d() and subnetwork_ipv6_options[subnetwork_iface]|d() %}
+      {{ subnetwork_ipv6_options[subnetwork_iface]|d() }}
       {% endif %}
 
