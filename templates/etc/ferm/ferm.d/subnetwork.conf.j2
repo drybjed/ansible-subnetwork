@@ -1,6 +1,7 @@
-# This file is managed by Ansible, all changes will be lost
+{% set subnetwork_tpl_ipv4 = subnetwork_addresses | unique | ipv4("host/prefix") %}
+# {{ ansible_managed }}
 
-{% if subnetwork_forwarding and subnetwork_forwarding %}
+{% if subnetwork_forwarding is defined and subnetwork_forwarding %}
 # Forward host connections to the outside world
 domain $domains table filter chain FORWARD {
 	interface {{ subnetwork_iface }} ACCEPT;
@@ -8,17 +9,16 @@ domain $domains table filter chain FORWARD {
 }
 
 {% endif %}
-{% if ((subnetwork_ipv4 is defined and subnetwork_ipv4 | ipv4) and
-       (subnetwork_ipv4_nat is defined and subnetwork_ipv4_nat)) %}
+{% if (subnetwork_tpl_ipv4 and (subnetwork_ipv4_nat is defined and subnetwork_ipv4_nat)) %}
 # Manage DNAT/MASQUERADE for IPv4 network
 @if $ipv4_enabled {
 	domain ip table nat {
 		chain POSTROUTING {
-			destination {{ subnetwork_ipv4 | ipaddr('network') }}/{{ subnetwork_ipv4 | ipaddr('netmask') }} RETURN;
+			destination {{ subnetwork_tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork_tpl_ipv4 | first | ipaddr('netmask') }} RETURN;
 {% if subnetwork_ipv4_nat_masquerade is defined and subnetwork_ipv4_nat_masquerade %}
-			source {{ subnetwork_ipv4 | ipaddr('network') }}/{{ subnetwork_ipv4 | ipaddr('netmask') }} MASQUERADE;
+			source {{ subnetwork_tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork_tpl_ipv4 | first | ipaddr('netmask') }} MASQUERADE;
 {% elif subnetwork_ipv4_nat_masquerade is defined and not subnetwork_ipv4_nat_masquerade %}
-			source {{ subnetwork_ipv4 | ipaddr('network') }}/{{ subnetwork_ipv4 | ipaddr('netmask') }} SNAT to {{ hostvars[inventory_hostname]["ansible_" + subnetwork_ipv4_gateway].ipv4.address }};
+			source {{ subnetwork_tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork_tpl_ipv4 | first | ipaddr('netmask') }} SNAT to {{ hostvars[inventory_hostname]["ansible_" + subnetwork_ipv4_nat_snat_interface].ipv4.address }};
 {% endif %}
 		}
 	}
