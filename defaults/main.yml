@@ -1,23 +1,17 @@
 ---
 
-# ---- Network interfaces and firewall ----
-
 # Network interface to configure, by default a bridge
 subnetwork_iface: 'br2'
+
+# List of IPv4 and/or IPv6 addresses to configure on the bridge, in the
+# "host/prefix" format. Required!
+subnetwork_addresses: []
 
 # Network interfaces to attach to a bridge on ifup
 subnetwork_bridge_ports: [ 'none' ]
 
 # Enable packet forwarding from internal network to the outside world
 subnetwork_forwarding: True
-
-
-# ---- IPv4 network ----
-
-# IPv4 address set at the interface, in the 'host/prefix' format. It should be
-# an address of local network gateway, for example '192.0.2.1/24'. Only one
-# IPv4 address is supported
-subnetwork_ipv4: ''
 
 # Should IPv4 network be configured behind NAT? You might want to disable this
 # and configure routing elsewhere if you have public IPv4 subnet
@@ -28,45 +22,16 @@ subnetwork_ipv4_nat: True
 # Leave it True if you use a laptop or change networks frequently
 subnetwork_ipv4_nat_masquerade: True
 
-# Network interface to the default IPv4 gateway
-subnetwork_ipv4_gateway: '{{ ansible_default_ipv4.interface | default("") }}'
+# Network interface used as a source for outgoing IPv4 connections from NAT
+subnetwork_ipv4_nat_snat_interface: '{{ ansible_default_ipv4.interface | default("") }}'
 
-# Additional options passed to the ifupdown configuration for IPv4 network.
-# Each set of options for a particular network interface needs to be in
-# a separate dict key, in a YAML text block as a value.
-subnetwork_ipv4_options: {}
-# 'br2': |
-#   dns-nameservers 192.0.2.1
-#   dns-search example.org
+# IPv4 network options
+subnetwork_options: |
+  bridge_fd 0
 
-
-# ---- IPv6 network ----
-
-# List of IPv6 addresses configured at the interface (multiple IPv6 addresses
-# are supported). You can configure here your own IPv6 prefixes from the
-# upstream router. If you don't have your own prefixes, you can set an ULA
-# prefix instead, for example from http://unique-local-ipv6.com/
-# CIDR /64 prefix is preferred for local network,
-# You need to specify addresses in 'host/prefix' format, with IPv6 address of
-# the gateway (ending with '::1'), for example: [ '2001:db8:2c33:deb0::1/64' ]
-subnetwork_ipv6: []
-
-# Network interface to the default IPv6 gateway
-subnetwork_ipv6_gateway: '{{ ansible_default_ipv6.interface | default("") }}'
-
-# Additional options passed to the ifupdown configuration for IPv6 network.
-# Each set of options for a particular network interface needs to be in
-# a separate dict key, in a YAML text block as a value.
-subnetwork_ipv6_options: {}
-# 'br2': |
-#   dns-nameservers 2001:db8:c001:51ed::1
-#   dns-search example.org
-
-
-# ---- ifupdown interface templates ----
-
-# List of additional interfaces to configure before the main bridge
-subnetwork_ifupdown_prepend_interfaces: []
+# IPv6 network options
+subnetwork_options6: |
+  pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork_iface }}/accept_dad
 
 # List of network interfaces to configure for the local network
 subnetwork_ifupdown_interfaces:
@@ -74,47 +39,21 @@ subnetwork_ifupdown_interfaces:
     # IPv4 network + bridge
   - iface: '{{ subnetwork_iface }}'
     type: '{% if subnetwork_iface | search("^br*") %}bridge{% else %}interface{% endif %}'
-    inet: '{% if subnetwork_ipv4 | ipv4("host/prefix") %}static{% else %}manual{% endif %}'
-    filename: 'subnetwork_{{ subnetwork_iface }}_ipv4'
+    inet: '{% if subnetwork_addresses | unique | ipv4("host/prefix") %}static{% else %}manual{% endif %}'
+    addresses: '{{ subnetwork_addresses | unique | ipv4("host/prefix") }}'
+    alias: 'subnetwork'
     weight: '40'
-    options: |
-      {% if subnetwork_ipv4 | ipv4('host/prefix') %}
-      address        {{ subnetwork_ipv4 | ipaddr('address') }}
-      network        {{ subnetwork_ipv4 | ipaddr('network') }}
-      netmask        {{ subnetwork_ipv4 | ipaddr('netmask') }}
-      broadcast      {{ subnetwork_ipv4 | ipaddr('broadcast') }}
-      {% endif %}
-      {% if subnetwork_iface | search('^br.*') %}
-      bridge_ports   {{ subnetwork_bridge_ports | join(' ') }}
-      bridge_stp     on
-      bridge_fd      0
-      bridge_maxwait 0
-      {% endif %}
-      {% if subnetwork_ipv4_options|d() and subnetwork_ipv4_options[subnetwork_iface]|d() %}
-      {{ subnetwork_ipv4_options[subnetwork_iface]|d() }}
-      {% endif %}
+    bridge_ports: '{{ subnetwork_bridge_ports }}'
+    options: '{{ subnetwork_options }}'
 
     # IPv6 network
   - iface: '{{ subnetwork_iface }}'
     type: 'interface'
-    inet6: '{% if subnetwork_ipv6 | unique | ipv6("host/prefix") %}static{% else %}manual{% endif %}'
-    filename: 'subnetwork_{{ subnetwork_iface }}_ipv6'
+    inet6: '{% if subnetwork_addresses | unique | ipv6("host/prefix") %}static{% else %}manual{% endif %}'
+    addresses: '{{ subnetwork_addresses | unique | ipv6("host/prefix") }}'
+    alias: 'subnetwork'
     weight: '40'
     auto: False
     allow: False
-    force: True
-    options: |
-      pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork_iface }}/accept_dad
-      {% set subnetwork_var_ipv6_subnets = subnetwork_ipv6 | unique | ipv6('host/prefix') %}
-      {% if subnetwork_var_ipv6_subnets %}
-      address {{ subnetwork_var_ipv6_subnets[0] }}
-      {% if subnetwork_var_ipv6_subnets | length > 1 %}
-      {% for subnet in subnetwork_var_ipv6_subnets[1:] %}
-      up   /sbin/ip address add {{ subnet }} dev {{ subnetwork_iface }}
-      down /sbin/ip address del {{ subnet }} dev {{ subnetwork_iface }}
-      {% endfor %}{% endif %}
-      {% endif %}
-      {% if subnetwork_ipv6_options|d() and subnetwork_ipv6_options[subnetwork_iface]|d() %}
-      {{ subnetwork_ipv6_options[subnetwork_iface]|d() }}
-      {% endif %}
+    options: '{{ subnetwork_options6 }}'
 
