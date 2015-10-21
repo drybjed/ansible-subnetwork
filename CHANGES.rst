@@ -10,7 +10,7 @@ v0.1.1
 
   Most of the "logic" behind how IP addresses were configured is now included
   in ``debops.ifupdown``. Instead of having separate variables for IPv4 and
-  IPv6 addresses, you now shouldd use ``subnetwork_addresses`` list to specify
+  IPv6 addresses, you now should use ``subnetwork_addresses`` list to specify
   IPv4/IPv6 subnets to configure, in the "host/prefix" format.
 
   Names of generated files in ``/etc/network/interfaces.d/`` have been changed
@@ -52,6 +52,6 @@ v0.1.0
   keys specifying the interface name and values being YAML text blocks with
   options.
 
-  Note that dict keys must be specified explicity, not as Jinja variables. See
+  Note that dict keys must be specified explicitly, not as Jinja variables. See
   ``defaults/main.yml`` file for examples. [drybjed]
 
