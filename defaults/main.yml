@@ -1,6 +1,17 @@
 ---
+# Default variables
+# =================
 
-# Network interface to configure, by default a bridge
+# .. contents:: Sections
+#    :local:
+#
+# ---------------------------
+#   subnetwork configuration
+# ---------------------------
+
+# .. envvar:: subnetwork_iface
+#
+# Network interface to configure, by default a bridge.
 subnetwork_iface: 'br2'
 
 # .. envvar:: subnetwork_bridge_iface_regex
@@ -10,37 +21,65 @@ subnetwork_iface: 'br2'
 # configured as interface.
 subnetwork_bridge_iface_regex: '^(br|nat)*'
 
-# List of IPv4 and/or IPv6 addresses to configure on the bridge, in the
-# "host/prefix" format. Required!
+
+# .. envvar:: subnetwork_addresses
+#
+# Required! List of IPv4 and/or IPv6 addresses to configure on the bridge, in
+# the "host/prefix" format.
 subnetwork_addresses: []
 
-# Network interfaces to attach to a bridge on ifup
+
+# .. envvar:: subnetwork_bridge_ports
+#
+# Network interfaces to attach to a bridge on ifup.
 subnetwork_bridge_ports: [ 'none' ]
 
-# Enable packet forwarding from internal network to the outside world
+
+# .. envvar:: subnetwork_forwarding
+#
+# Enable packet forwarding from internal network to the outside world.
 subnetwork_forwarding: True
 
-# Should IPv4 network be configured behind NAT? You might want to disable this
-# and configure routing elsewhere if you have public IPv4 subnet
+
+# .. envvar:: subnetwork_ipv4_nat
+#
+# Should IPv4 networking be configured behind NAT? You might want to disable
+# this and configure routing elsewhere if you have a public IPv4 subnet which
+# you want to use.
 subnetwork_ipv4_nat: True
 
-# Should IPv4 traffic from internal network be masqueraded? If disabled, static
-# SNAT with default IPv4 address of the gateway will be configured instead.
-# Leave it True if you use a laptop or change networks frequently
+
+# .. envvar:: subnetwork_ipv4_nat_masquerade
+#
+# Should IPv4 traffic from the internal network be masqueraded? If disabled, static
+# SNAT with the default IPv4 address of the gateway will be configured instead.
+# Leave it True if you use a laptop or change networks frequently.
 subnetwork_ipv4_nat_masquerade: True
 
-# Network interface used as a source for outgoing IPv4 connections from NAT
+
+# .. envvar:: subnetwork_ipv4_nat_snat_interface
+#
+# Network interface used as a source for outgoing IPv4 connections from NAT.
 subnetwork_ipv4_nat_snat_interface: '{{ ansible_default_ipv4.interface | default("") }}'
 
-# IPv4 network options
+
+# .. envvar:: subnetwork_options
+#
+# IPv4 network options.
 subnetwork_options: |
   bridge_fd 0
 
+
+# .. envvar:: subnetwork_options6
+#
 # IPv6 network options
 subnetwork_options6: |
   pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork_iface }}/accept_dad
 
-# List of network interfaces to configure for the local network
+
+# .. envvar:: subnetwork_ifupdown_interfaces
+#
+# List of network interfaces to configure for the local network.
 subnetwork_ifupdown_interfaces:
 
     # IPv4 network + bridge

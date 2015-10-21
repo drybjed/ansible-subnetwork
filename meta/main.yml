@@ -3,9 +3,13 @@
 dependencies:
 
   - role: debops.ifupdown
+    tags: [ 'depend::ifupdown', 'depend::ifupdown:subnetwork',
+            'depend-of::subnetwork', 'type::dependency' ]
     ifupdown_dependent_interfaces: '{{ subnetwork_ifupdown_interfaces }}'
 
   - role: debops.ferm
+    tags: [ 'depend::ferm', 'depend::ferm:subnetwork',
+            'depend-of::subnetwork', 'type::dependency' ]
     ferm_forward: True
 
 galaxy_info:
