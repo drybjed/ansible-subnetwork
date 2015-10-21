@@ -3,6 +3,13 @@
 # Network interface to configure, by default a bridge
 subnetwork_iface: 'br2'
 
+# .. envvar:: subnetwork_bridge_iface_regex
+#
+# Regular expression when matching ref:`subnetwork_iface` then
+# ref:`subnetwork_iface` will be configured as bridge else it will be
+# configured as interface.
+subnetwork_bridge_iface_regex: '^(br|nat)*'
+
 # List of IPv4 and/or IPv6 addresses to configure on the bridge, in the
 # "host/prefix" format. Required!
 subnetwork_addresses: []
@@ -38,7 +45,7 @@ subnetwork_ifupdown_interfaces:
 
     # IPv4 network + bridge
   - iface: '{{ subnetwork_iface }}'
-    type: '{% if subnetwork_iface | search("^br*") %}bridge{% else %}interface{% endif %}'
+    type: '{% if subnetwork_iface | search(subnetwork_bridge_iface_regex) %}bridge{% else %}interface{% endif %}'
     inet: '{% if subnetwork_addresses | unique | ipv4("host/prefix") %}static{% else %}manual{% endif %}'
     addresses: '{{ subnetwork_addresses | unique | ipv4("host/prefix") }}'
     alias: 'subnetwork'
