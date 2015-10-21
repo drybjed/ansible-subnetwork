@@ -30,6 +30,10 @@ v0.1.1
   specifies the interface from which firewall should take an IPv4 address to
   use in SNAT directive. [drybjed]
 
+- Added ``subnetwork_bridge_iface_regex`` variable to allow to use different
+  ``subnetwork_iface`` names without modifying the default
+  ``subnetwork_ifupdown_interfaces``. [ypid]
+
 v0.1.0
 ------
 
