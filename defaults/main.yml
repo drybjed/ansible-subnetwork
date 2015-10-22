@@ -19,7 +19,7 @@ subnetwork_iface: 'br2'
 # Regular expression when matching ref:`subnetwork_iface` then
 # ref:`subnetwork_iface` will be configured as bridge else it will be
 # configured as interface.
-subnetwork_bridge_iface_regex: '^(br|nat)*'
+subnetwork_bridge_iface_regex: '^(br|nat).*$'
 
 
 # .. envvar:: subnetwork_addresses
