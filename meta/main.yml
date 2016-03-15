@@ -1,36 +1,30 @@
 ---
 
-dependencies:
-
-  - role: debops.ifupdown
-    tags: [ 'depend::ifupdown', 'depend::ifupdown:subnetwork',
-            'depend-of::subnetwork', 'type::dependency' ]
-    ifupdown_dependent_interfaces: '{{ subnetwork_ifupdown_interfaces }}'
-
-  - role: debops.ferm
-    tags: [ 'depend::ferm', 'depend::ferm:subnetwork',
-            'depend-of::subnetwork', 'type::dependency' ]
-    ferm_forward: True
+dependencies: []
 
 galaxy_info:
+
+  company: 'DebOps'
   author: 'Maciej Delmanowski'
   description: 'Configure LAN with IPv4/NAT and IPv6 network support'
-  company: 'DebOps'
   license: 'GNU General Public License v3'
   min_ansible_version: '1.7.0'
+
   platforms:
-  - name: Ubuntu
-    versions:
-    - precise
-    - quantal
-    - raring
-    - saucy
-    - trusty
-  - name: Debian
-    versions:
-    - wheezy
-    - jessie
-  categories:
+
+    - name: Ubuntu
+      versions:
+        - precise
+        - quantal
+        - raring
+        - saucy
+        - trusty
+
+    - name: Debian
+      versions:
+        - wheezy
+        - jessie
+
+  galaxy_tags:
   - system
   - networking
-

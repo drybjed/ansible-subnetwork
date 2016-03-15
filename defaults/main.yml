@@ -37,8 +37,16 @@ subnetwork_bridge_ports: [ 'none' ]
 
 # .. envvar:: subnetwork_forwarding
 #
-# Enable packet forwarding from internal network to the outside world.
+# Enable packet forwarding from internal network created by
+# ``debops.subnetwork`` to the outside world.
 subnetwork_forwarding: True
+
+
+# .. envvar:: subnetwork_kernel_forwarding
+#
+# Configure the IP forwarding ability via ``debops.ferm``.
+# E.g. configure IP forwarding in the Linux kernel.
+subnetwork_kernel_forwarding: True
 
 
 # .. envvar:: subnetwork_ipv4_nat
@@ -77,15 +85,21 @@ subnetwork_options6: |
   pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork_iface }}/accept_dad
 
 
-# .. envvar:: subnetwork_ifupdown_interfaces
+# .. Role-dependent configuration (((
+#
+# --------------------------------
+#   Role-dependent configuration
+# --------------------------------
+
+# .. envvar:: subnetwork__ifupdown__dependent_list
 #
 # List of network interfaces to configure for the local network.
-subnetwork_ifupdown_interfaces:
+subnetwork__ifupdown__dependent_list:
 
     # IPv4 network + bridge
   - iface: '{{ subnetwork_iface }}'
-    type: '{% if subnetwork_iface | search(subnetwork_bridge_iface_regex) %}bridge{% else %}interface{% endif %}'
-    inet: '{% if subnetwork_addresses | unique | ipv4("host/prefix") %}static{% else %}manual{% endif %}'
+    type: '{{ "bridge" if (subnetwork_iface | search(subnetwork_bridge_iface_regex)) else "interface" }}'
+    inet: '{{ "static" if (subnetwork_addresses | unique | ipv4("host/prefix")) else "manual" }}'
     addresses: '{{ subnetwork_addresses | unique | ipv4("host/prefix") }}'
     alias: 'subnetwork'
     weight: '40'
@@ -95,7 +109,7 @@ subnetwork_ifupdown_interfaces:
     # IPv6 network
   - iface: '{{ subnetwork_iface }}'
     type: 'interface'
-    inet6: '{% if subnetwork_addresses | unique | ipv6("host/prefix") %}static{% else %}manual{% endif %}'
+    inet6: '{{ "static" if (subnetwork_addresses | unique | ipv6("host/prefix")) else "manual" }}'
     addresses: '{{ subnetwork_addresses | unique | ipv6("host/prefix") }}'
     alias: 'subnetwork'
     weight: '40'

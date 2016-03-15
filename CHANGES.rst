@@ -1,6 +1,22 @@
 Changelog
 =========
 
+v0.2.0
+------
+
+*Unreleased*
+
+- Remove most of the Ansible role dependencies, leaving only those that are
+  required for the role to run correctly.
+
+  Configuration of dependent services like firewall, TCP Wrappers, APT
+  preferences is set in separate default variables. These variables can be used
+  by Ansible playbooks to configure settings related to ``subnetwork`` in other
+  services. [ypid]
+
+- Renamed ``subnetwork_ifupdown_interfaces`` to
+  ``subnetwork__ifupdown__dependent_list``. [ypid]
+
 v0.1.1
 ------
 
