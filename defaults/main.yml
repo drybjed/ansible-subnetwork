@@ -11,85 +11,85 @@
 #   subnetwork configuration
 # ---------------------------
 
-# .. envvar:: subnetwork_iface
+# .. envvar:: subnetwork__iface
 #
 # Network interface to configure, by default a bridge.
-subnetwork_iface: 'br2'
+subnetwork__iface: 'br2'
 
-# .. envvar:: subnetwork_bridge_iface_regex
+# .. envvar:: subnetwork__bridge_iface_regex
 #
-# Regular expression when matching ref:`subnetwork_iface` then
-# ref:`subnetwork_iface` will be configured as bridge else it will be
+# Regular expression when matching ref:`subnetwork__iface` then
+# ref:`subnetwork__iface` will be configured as bridge else it will be
 # configured as interface.
-subnetwork_bridge_iface_regex: '^(br|nat).*$'
+subnetwork__bridge_iface_regex: '^(br|nat).*$'
 
 
-# .. envvar:: subnetwork_addresses
+# .. envvar:: subnetwork__addresses
 #
 # Required! List of IPv4 and/or IPv6 addresses to configure on the bridge, in
 # the "host/prefix" format.
 #
 # Example::
 #
-#    subnetwork_addresses: [ '192.0.2.1/24' ]
+#    subnetwork__addresses: [ '192.0.2.1/24' ]
 #
-subnetwork_addresses: []
+subnetwork__addresses: []
 
 
-# .. envvar:: subnetwork_bridge_ports
+# .. envvar:: subnetwork__bridge_ports
 #
 # Network interfaces to attach to a bridge on ifup.
-subnetwork_bridge_ports: [ 'none' ]
+subnetwork__bridge_ports: [ 'none' ]
 
 
-# .. envvar:: subnetwork_forwarding
+# .. envvar:: subnetwork__forwarding
 #
 # Enable packet forwarding from internal network created by
 # ``debops.subnetwork`` to the outside world.
-subnetwork_forwarding: True
+subnetwork__forwarding: True
 
 
-# .. envvar:: subnetwork_kernel_forwarding
+# .. envvar:: subnetwork__kernel_forwarding
 #
 # Configure the IP forwarding ability via ``debops.ferm``.
 # E.g. configure IP forwarding in the Linux kernel.
-subnetwork_kernel_forwarding: True
+subnetwork__kernel_forwarding: True
 
 
-# .. envvar:: subnetwork_ipv4_nat
+# .. envvar:: subnetwork__ipv4_nat
 #
 # Should IPv4 networking be configured behind NAT? You might want to disable
 # this and configure routing elsewhere if you have a public IPv4 subnet which
 # you want to use.
-subnetwork_ipv4_nat: True
+subnetwork__ipv4_nat: True
 
 
-# .. envvar:: subnetwork_ipv4_nat_masquerade
+# .. envvar:: subnetwork__ipv4_nat_masquerade
 #
 # Should IPv4 traffic from the internal network be masqueraded? If disabled, static
 # SNAT with the default IPv4 address of the gateway will be configured instead.
 # Leave it True if you use a laptop or change networks frequently.
-subnetwork_ipv4_nat_masquerade: True
+subnetwork__ipv4_nat_masquerade: True
 
 
-# .. envvar:: subnetwork_ipv4_nat_snat_interface
+# .. envvar:: subnetwork__ipv4_nat_snat_interface
 #
 # Network interface used as a source for outgoing IPv4 connections from NAT.
-subnetwork_ipv4_nat_snat_interface: '{{ ansible_default_ipv4.interface | default("") }}'
+subnetwork__ipv4_nat_snat_interface: '{{ ansible_default_ipv4.interface | default("") }}'
 
 
-# .. envvar:: subnetwork_options
+# .. envvar:: subnetwork__options
 #
 # IPv4 network options.
-subnetwork_options: |
+subnetwork__options: |
   bridge_fd 0
 
 
-# .. envvar:: subnetwork_options6
+# .. envvar:: subnetwork__options6
 #
 # IPv6 network options
-subnetwork_options6: |
-  pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork_iface }}/accept_dad
+subnetwork__options6: |
+  pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork__iface }}/accept_dad
 
 # .. )))
 
@@ -105,25 +105,25 @@ subnetwork_options6: |
 subnetwork__ifupdown__dependent_list:
 
     # IPv4 network + bridge
-  - iface: '{{ subnetwork_iface }}'
-    type: '{{ "bridge" if (subnetwork_iface | search(subnetwork_bridge_iface_regex)) else "interface" }}'
-    inet: '{{ "static" if (subnetwork_addresses | unique | ipv4("host/prefix")) else "manual" }}'
-    addresses: '{{ subnetwork_addresses | unique | ipv4("host/prefix") }}'
+  - iface: '{{ subnetwork__iface }}'
+    type: '{{ "bridge" if (subnetwork__iface | search(subnetwork__bridge_iface_regex)) else "interface" }}'
+    inet: '{{ "static" if (subnetwork__addresses | unique | ipv4("host/prefix")) else "manual" }}'
+    addresses: '{{ subnetwork__addresses | unique | ipv4("host/prefix") }}'
     alias: 'subnetwork'
     weight: '40'
-    bridge_ports: '{{ subnetwork_bridge_ports }}'
-    options: '{{ subnetwork_options }}'
+    bridge_ports: '{{ subnetwork__bridge_ports }}'
+    options: '{{ subnetwork__options }}'
 
     # IPv6 network
-  - iface: '{{ subnetwork_iface }}'
+  - iface: '{{ subnetwork__iface }}'
     type: 'interface'
-    inet6: '{{ "static" if (subnetwork_addresses | unique | ipv6("host/prefix")) else "manual" }}'
-    addresses: '{{ subnetwork_addresses | unique | ipv6("host/prefix") }}'
+    inet6: '{{ "static" if (subnetwork__addresses | unique | ipv6("host/prefix")) else "manual" }}'
+    addresses: '{{ subnetwork__addresses | unique | ipv6("host/prefix") }}'
     alias: 'subnetwork'
     weight: '40'
     auto: False
     allow: False
-    options: '{{ subnetwork_options6 }}'
+    options: '{{ subnetwork__options6 }}'
 
 
 # .. envvar:: subnetwork__ferm__dependent_rules
@@ -139,32 +139,32 @@ subnetwork__ferm__dependent_rules:
     rules: |
       # Forward host connections to the outside world
       domain $domains table filter chain FORWARD {
-        interface {{ subnetwork_iface }} ACCEPT;
-        outerface {{ subnetwork_iface }} ACCEPT;
+        interface {{ subnetwork__iface }} ACCEPT;
+        outerface {{ subnetwork__iface }} ACCEPT;
       }
-    when: '{{ subnetwork_forwarding|d() | bool }}'
-    delete: '{{ not (subnetwork_forwarding|d() | bool) }}'
+    when: '{{ subnetwork__forwarding|d() | bool }}'
+    delete: '{{ not (subnetwork__forwarding|d() | bool) }}'
 
   - type: 'custom'
     weight: '50'
     role: 'subnetwork'
     name: 'nat_postrouting'
     rules: |
-      {% set subnetwork_tpl_ipv4 = subnetwork_addresses | unique | ipv4("host/prefix") %}
+      {% set subnetwork__tpl_ipv4 = subnetwork__addresses | unique | ipv4("host/prefix") %}
       # Manage DNAT/MASQUERADE for IPv4 network
       @if $ipv4_enabled {
         domain ip table nat {
           chain POSTROUTING {
-            destination {{ subnetwork_tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork_tpl_ipv4 | first | ipaddr('netmask') }} RETURN;
-      {% if subnetwork_ipv4_nat_masquerade|d() | bool %}
-            source {{ subnetwork_tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork_tpl_ipv4 | first | ipaddr('netmask') }} MASQUERADE;
+            destination {{ subnetwork__tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork__tpl_ipv4 | first | ipaddr('netmask') }} RETURN;
+      {% if subnetwork__ipv4_nat_masquerade|d() | bool %}
+            source {{ subnetwork__tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork__tpl_ipv4 | first | ipaddr('netmask') }} MASQUERADE;
       {% else %}
-            source {{ subnetwork_tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork_tpl_ipv4 | first | ipaddr('netmask') }} SNAT to {{ hostvars[inventory_hostname]["ansible_" + subnetwork_ipv4_nat_snat_interface].ipv4.address }};
+            source {{ subnetwork__tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork__tpl_ipv4 | first | ipaddr('netmask') }} SNAT to {{ hostvars[inventory_hostname]["ansible_" + subnetwork__ipv4_nat_snat_interface].ipv4.address }};
       {% endif %}
           }
         }
       }
-    when: '{{ ((subnetwork_addresses | unique | ipv4("host/prefix")) and (subnetwork_ipv4_nat | bool)) }}'
-    delete: '{{ not ((subnetwork_addresses | unique | ipv4("host/prefix")) and (subnetwork_ipv4_nat | bool)) }}'
+    when: '{{ ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) }}'
+    delete: '{{ not ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) }}'
 
 # .. )))

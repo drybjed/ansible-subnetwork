@@ -23,6 +23,16 @@ v0.2.0
 - Added ``debops.subnetwork/env`` role to check Ansible inventory variables
   before starting to let dependency roles process them. [ypid]
 
+- Changed namespace from ``subnetwork_`` to ``subnetwork__``.
+  ``subnetwork_[^_]`` variables are hereby deprecated and you might need to
+  update your inventory. This oneliner might come in handy to do this.
+
+  .. code:: shell
+
+     git ls-files -z | find -type f -print0 | xargs --null sed --in-place --regexp-extended 's/(subnetwork)_([^_])/\1__\2/g'
+
+  [ypid]
+
 v0.1.1
 ------
 
