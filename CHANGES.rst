@@ -33,6 +33,8 @@ v0.2.0
 
   [ypid]
 
+- Documented basic usage of the role. [ypid]
+
 v0.1.1
 ------
 
