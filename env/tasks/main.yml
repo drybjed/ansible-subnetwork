@@ -1,6 +1,6 @@
 ---
 
-- name: Ensure that all given addresses are host/prefix format
+- name: Ensure that all given addresses are in host/prefix format
   assert:
     that:
       - (subnetwork__addresses | length) == (subnetwork__addresses | ipv4("host/prefix") | length)
