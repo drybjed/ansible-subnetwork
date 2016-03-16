@@ -20,6 +20,9 @@ v0.2.0
 - Use ``subnetwork__ifupdown__dependent_list`` to generate Firewall entries
   instead of templating a file under :file:`/etc/ferm`. [ypid]
 
+- Added ``debops.subnetwork/env`` role to check Ansible inventory variables
+  before starting to let dependency roles process them. [ypid]
+
 v0.1.1
 ------
 
