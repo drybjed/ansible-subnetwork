@@ -1,26 +1,46 @@
-Ansible tags
-------------
+Getting started
+===============
 
-You can use Ansible ``--tags`` or ``--skip-tags`` parameters to limit what
-tasks are performed during Ansible run. This can be used after host is first
-configured to speed up playbook execution, when you are sure that most of the
-configuration has not been changed.
+.. contents::
+   :local:
 
-Available role tags:
 
-``role::subnetwork``
-  Main role tag, should be used in the playbook to execute all of the role
-  tasks as well as role dependencies.
+Example inventory
+-----------------
 
-``type::dependency``
-  This tag specifies which tasks are defined in role dependencies. You can use
-  this to omit them using ``--skip-tags`` parameter.
+To run ``debops.subnetwork`` on host given in
+``debops_service_subnetwork`` Ansible inventory group:
 
-``depend-of::subnetwork``
-  Execute all ``debops.subnetwork`` role dependencies in its context.
+.. code:: ini
 
-``depend::ifupdown:subnetwork``
-  Run ``debops.ifupdown`` dependent role in ``debops.subnetwork`` context.
+    [debops_service_subnetwork]
+    hostname
 
-``depend::ferm:subnetwork``
-  Run ``debops.ferm`` dependent role in ``debops.subnetwork`` context.
+Example playbook
+----------------
+
+Here's an example playbook that can be used to configure local networks::
+
+    ---
+
+    - name: Configure internal networks
+      hosts: [ 'debops_service_subnetwork', 'debops_subnetwork' ]
+      become: True
+
+      roles:
+
+        - role: debops.subnetwork/env
+          tags: [ 'role::subnetwork' ]
+
+        - role: debops.ifupdown
+          tags: [ 'role::ifupdown' ]
+          ifupdown_dependent_interfaces: '{{ subnetwork__ifupdown__dependent_list }}'
+
+        - role: debops.ferm
+          tags: [ 'role::ferm' ]
+          ferm_forward: '{{ subnetwork__kernel_forwarding|d() | bool }}'
+          ferm_dependent_rules:
+            - '{{ subnetwork__ferm__dependent_rules }}'
+
+        - role: debops.subnetwork
+          tags: [ 'role::subnetwork' ]

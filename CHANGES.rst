@@ -1,6 +1,40 @@
 Changelog
 =========
 
+v0.2.0
+------
+
+*Unreleased*
+
+- Remove most of the Ansible role dependencies, leaving only those that are
+  required for the role to run correctly.
+
+  Configuration of dependent services like firewall, TCP Wrappers, APT
+  preferences is set in separate default variables. These variables can be used
+  by Ansible playbooks to configure settings related to ``subnetwork`` in other
+  services. [ypid]
+
+- Renamed ``subnetwork_ifupdown_interfaces`` to
+  ``subnetwork__ifupdown__dependent_list``. [ypid]
+
+- Use ``subnetwork__ifupdown__dependent_list`` to generate Firewall entries
+  instead of templating a file under :file:`/etc/ferm`. [ypid]
+
+- Added the ``debops.subnetwork/env`` role to check Ansible inventory variables
+  before starting to let dependency roles process them. [ypid]
+
+- Changed namespace from ``subnetwork_`` to ``subnetwork__``.
+  ``subnetwork_[^_]`` variables are hereby deprecated and you might need to
+  update your inventory. This oneliner might come in handy to do this.
+
+  .. code:: shell
+
+     git ls-files -z | find -type f -print0 | xargs --null sed --in-place --regexp-extended 's/(subnetwork)_([^_])/\1__\2/g'
+
+  [ypid]
+
+- Documented basic usage of the role. [ypid]
+
 v0.1.1
 ------
 
