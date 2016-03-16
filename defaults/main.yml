@@ -5,6 +5,8 @@
 # .. contents:: Sections
 #    :local:
 #
+# .. subnetwork configuration (((
+#
 # ---------------------------
 #   subnetwork configuration
 # ---------------------------
@@ -26,6 +28,11 @@ subnetwork_bridge_iface_regex: '^(br|nat).*$'
 #
 # Required! List of IPv4 and/or IPv6 addresses to configure on the bridge, in
 # the "host/prefix" format.
+#
+# Example::
+#
+#    subnetwork_addresses: [ '192.0.2.1/24' ]
+#
 subnetwork_addresses: []
 
 
@@ -84,6 +91,7 @@ subnetwork_options: |
 subnetwork_options6: |
   pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork_iface }}/accept_dad
 
+# .. )))
 
 # .. Role-dependent configuration (((
 #
@@ -117,3 +125,46 @@ subnetwork__ifupdown__dependent_list:
     allow: False
     options: '{{ subnetwork_options6 }}'
 
+
+# .. envvar:: subnetwork__ferm__dependent_rules
+#
+# Configuration for ``debops.ferm`` firewall. It should be added when
+# ``debops.ferm`` role is used to configure Apt-Cacher NG firewall rules.
+subnetwork__ferm__dependent_rules:
+
+  - type: 'custom'
+    weight: '50'
+    role: 'subnetwork'
+    name: 'filter_forward'
+    rules: |
+      # Forward host connections to the outside world
+      domain $domains table filter chain FORWARD {
+        interface {{ subnetwork_iface }} ACCEPT;
+        outerface {{ subnetwork_iface }} ACCEPT;
+      }
+    when: '{{ subnetwork_forwarding|d() | bool }}'
+    delete: '{{ not (subnetwork_forwarding|d() | bool) }}'
+
+  - type: 'custom'
+    weight: '50'
+    role: 'subnetwork'
+    name: 'nat_postrouting'
+    rules: |
+      {% set subnetwork_tpl_ipv4 = subnetwork_addresses | unique | ipv4("host/prefix") %}
+      # Manage DNAT/MASQUERADE for IPv4 network
+      @if $ipv4_enabled {
+        domain ip table nat {
+          chain POSTROUTING {
+            destination {{ subnetwork_tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork_tpl_ipv4 | first | ipaddr('netmask') }} RETURN;
+      {% if subnetwork_ipv4_nat_masquerade|d() | bool %}
+            source {{ subnetwork_tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork_tpl_ipv4 | first | ipaddr('netmask') }} MASQUERADE;
+      {% else %}
+            source {{ subnetwork_tpl_ipv4 | first | ipaddr('network') }}/{{ subnetwork_tpl_ipv4 | first | ipaddr('netmask') }} SNAT to {{ hostvars[inventory_hostname]["ansible_" + subnetwork_ipv4_nat_snat_interface].ipv4.address }};
+      {% endif %}
+          }
+        }
+      }
+    when: '{{ ((subnetwork_addresses | unique | ipv4("host/prefix")) and (subnetwork_ipv4_nat | bool)) }}'
+    delete: '{{ not ((subnetwork_addresses | unique | ipv4("host/prefix")) and (subnetwork_ipv4_nat | bool)) }}'
+
+# .. )))

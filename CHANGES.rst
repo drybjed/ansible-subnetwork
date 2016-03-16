@@ -17,6 +17,9 @@ v0.2.0
 - Renamed ``subnetwork_ifupdown_interfaces`` to
   ``subnetwork__ifupdown__dependent_list``. [ypid]
 
+- Use ``subnetwork__ifupdown__dependent_list`` to generate Firewall entries
+  instead of templating a file under :file:`/etc/ferm`. [ypid]
+
 v0.1.1
 ------
 
