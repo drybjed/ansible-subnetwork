@@ -3,4 +3,4 @@
 - name: Ensure that all given addresses are in host/prefix format
   assert:
     that:
-      - (subnetwork__addresses | length) == (subnetwork__addresses | ipv4("host/prefix") | length)
+      - (subnetwork__addresses | length) == (subnetwork__addresses | ipaddr("host/prefix") | length)
