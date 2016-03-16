@@ -16,6 +16,12 @@ ansigenome_info:
       twitter: 'drybjed'
       github: 'drybjed'
 
+    - name:  'Robin Schneider'
+      url: 'http://ypid.de/'
+      email: 'ypid@riseup.net'
+      twitter: 'ypid'
+      github: 'ypid'
+
   synopsis: |
     `debops.subnetwork` is an Ansible role that creates and manages a local
     network behind a bridge interface. It could also manage internal router
