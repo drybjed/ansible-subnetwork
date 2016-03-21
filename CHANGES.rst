@@ -45,6 +45,9 @@ v0.2.0
   has value, this fixes an issue when Ansible stops with an error when there
   are no addresses set. [drybjed]
 
+- Remove the assert check in ``debops.subnetwork/env`` and replace it with
+  conditional role execution in the playbook. [drybjed]
+
 v0.1.1
 ------
 
