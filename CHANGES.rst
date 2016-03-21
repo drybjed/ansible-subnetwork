@@ -38,6 +38,9 @@ v0.2.0
 - Enable packet forwarding through ``debops.ferm`` only when subnetwork
   addresses are defined. [drybjed]
 
+- Change the default ``ifupdown`` configuration "weight" to put the subnetwork
+  bridge after other bridges. [drybjed]
+
 v0.1.1
 ------
 

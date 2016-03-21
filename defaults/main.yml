@@ -112,7 +112,7 @@ subnetwork__ifupdown__dependent_list:
     inet: '{{ "static" if (subnetwork__addresses | unique | ipv4("host/prefix")) else "manual" }}'
     addresses: '{{ subnetwork__addresses | unique | ipv4("host/prefix") }}'
     alias: 'subnetwork'
-    weight: '40'
+    weight: '70'
     bridge_ports: '{{ subnetwork__bridge_ports }}'
     options: '{{ subnetwork__options }}'
 
@@ -122,7 +122,7 @@ subnetwork__ifupdown__dependent_list:
     inet6: '{{ "static" if (subnetwork__addresses | unique | ipv6("host/prefix")) else "manual" }}'
     addresses: '{{ subnetwork__addresses | unique | ipv6("host/prefix") }}'
     alias: 'subnetwork'
-    weight: '40'
+    weight: '70'
     auto: False
     allow: False
     options: '{{ subnetwork__options6 }}'
