@@ -48,6 +48,8 @@ v0.2.0
 - Remove the assert check in ``debops.subnetwork/env`` and replace it with
   conditional role execution in the playbook. [drybjed]
 
+- Update documentation. [drybjed]
+
 v0.1.1
 ------
 
