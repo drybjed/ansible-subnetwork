@@ -41,6 +41,10 @@ v0.2.0
 - Change the default ``ifupdown`` configuration "weight" to put the subnetwork
   bridge after other bridges. [drybjed]
 
+- Render the ``debops.ferm`` configuration only when ``subnetwork__addresses``
+  has value, this fixes an issue when Ansible stops with an error when there
+  are no addresses set. [drybjed]
+
 v0.1.1
 ------
 

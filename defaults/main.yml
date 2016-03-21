@@ -152,6 +152,7 @@ subnetwork__ferm__dependent_rules:
     role: 'subnetwork'
     name: 'nat_postrouting'
     rules: |
+      {% if subnetwork__addresses %}
       {% set subnetwork__tpl_ipv4 = subnetwork__addresses | unique | ipv4("host/prefix") %}
       # Manage DNAT/MASQUERADE for IPv4 network
       @if $ipv4_enabled {
@@ -166,6 +167,7 @@ subnetwork__ferm__dependent_rules:
           }
         }
       }
+      {% endif %}
     when: '{{ ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) }}'
     delete: '{{ not ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) }}'
 
