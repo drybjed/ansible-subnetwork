@@ -35,6 +35,9 @@ v0.2.0
 
 - Documented basic usage of the role. [ypid]
 
+- Enable packet forwarding through ``debops.ferm`` only when subnetwork
+  addresses are defined. [drybjed]
+
 v0.1.1
 ------
 

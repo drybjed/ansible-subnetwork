@@ -53,7 +53,9 @@ subnetwork__forwarding: True
 #
 # Configure the IP forwarding ability via ``debops.ferm``.
 # E.g. configure IP forwarding in the Linux kernel.
-subnetwork__kernel_forwarding: True
+subnetwork__kernel_forwarding: '{{ True
+                                   if subnetwork__addresses
+                                   else False }}'
 
 
 # .. envvar:: subnetwork__ipv4_nat
