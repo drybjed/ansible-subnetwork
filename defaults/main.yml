@@ -53,7 +53,9 @@ subnetwork__forwarding: True
 #
 # Configure the IP forwarding ability via ``debops.ferm``.
 # E.g. configure IP forwarding in the Linux kernel.
-subnetwork__kernel_forwarding: True
+subnetwork__kernel_forwarding: '{{ True
+                                   if subnetwork__addresses
+                                   else False }}'
 
 
 # .. envvar:: subnetwork__ipv4_nat
@@ -110,7 +112,7 @@ subnetwork__ifupdown__dependent_list:
     inet: '{{ "static" if (subnetwork__addresses | unique | ipv4("host/prefix")) else "manual" }}'
     addresses: '{{ subnetwork__addresses | unique | ipv4("host/prefix") }}'
     alias: 'subnetwork'
-    weight: '40'
+    weight: '70'
     bridge_ports: '{{ subnetwork__bridge_ports }}'
     options: '{{ subnetwork__options }}'
 
@@ -120,7 +122,7 @@ subnetwork__ifupdown__dependent_list:
     inet6: '{{ "static" if (subnetwork__addresses | unique | ipv6("host/prefix")) else "manual" }}'
     addresses: '{{ subnetwork__addresses | unique | ipv6("host/prefix") }}'
     alias: 'subnetwork'
-    weight: '40'
+    weight: '70'
     auto: False
     allow: False
     options: '{{ subnetwork__options6 }}'
@@ -150,6 +152,7 @@ subnetwork__ferm__dependent_rules:
     role: 'subnetwork'
     name: 'nat_postrouting'
     rules: |
+      {% if subnetwork__addresses %}
       {% set subnetwork__tpl_ipv4 = subnetwork__addresses | unique | ipv4("host/prefix") %}
       # Manage DNAT/MASQUERADE for IPv4 network
       @if $ipv4_enabled {
@@ -164,6 +167,7 @@ subnetwork__ferm__dependent_rules:
           }
         }
       }
+      {% endif %}
     when: '{{ ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) }}'
     delete: '{{ not ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) }}'
 

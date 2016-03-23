@@ -35,6 +35,21 @@ v0.2.0
 
 - Documented basic usage of the role. [ypid]
 
+- Enable packet forwarding through ``debops.ferm`` only when subnetwork
+  addresses are defined. [drybjed]
+
+- Change the default ``ifupdown`` configuration "weight" to put the subnetwork
+  bridge after other bridges. [drybjed]
+
+- Render the ``debops.ferm`` configuration only when ``subnetwork__addresses``
+  has value, this fixes an issue when Ansible stops with an error when there
+  are no addresses set. [drybjed]
+
+- Remove the assert check in ``debops.subnetwork/env`` and replace it with
+  conditional role execution in the playbook. [drybjed]
+
+- Update documentation. [drybjed]
+
 v0.1.1
 ------
 
