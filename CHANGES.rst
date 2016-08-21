@@ -3,10 +3,33 @@ Changelog
 
 .. include:: includes/all.rst
 
-v0.2.0
-------
+**debops.subnetwork**
 
-*Released: 2016-03-23*
+This project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`__
+and `human-readable changelog <http://keepachangelog.com/en/0.3.0/>`__.
+
+The current repository maintainer is drybjed_.
+
+
+`debops.subnetwork master`_ - unreleased
+-------------------------------------
+
+.. _debops.subnetwork master: https://github.com/debops/ansible-subnetwork/compare/v0.2.0...master
+
+
+`debops.subnetwork v0.2.0`_ - 2016-03-23
+----------------------------------------
+
+.. _debops.subnetwork v0.2.0: https://github.com/debops/ansible-subnetwork/compare/v0.1.1...v0.2.0
+
+Changed
+~~~~~~~
+
+- Renamed ``subnetwork_ifupdown_interfaces`` to
+  ``subnetwork__ifupdown__dependent_list``. [ypid]
+
+- Use ``subnetwork__ifupdown__dependent_list`` to generate Firewall entries
+  instead of templating a file under :file:`/etc/ferm`. [ypid]
 
 - Remove most of the Ansible role dependencies, leaving only those that are
   required for the role to run correctly.
@@ -15,15 +38,6 @@ v0.2.0
   preferences is set in separate default variables. These variables can be used
   by Ansible playbooks to configure settings related to ``subnetwork`` in other
   services. [ypid]
-
-- Renamed ``subnetwork_ifupdown_interfaces`` to
-  ``subnetwork__ifupdown__dependent_list``. [ypid]
-
-- Use ``subnetwork__ifupdown__dependent_list`` to generate Firewall entries
-  instead of templating a file under :file:`/etc/ferm`. [ypid]
-
-- Added the ``debops.subnetwork/env`` role to check Ansible inventory variables
-  before starting to let dependency roles process them. [ypid]
 
 - Changed namespace from ``subnetwork_`` to ``subnetwork__``.
   ``subnetwork_[^_]`` variables are hereby deprecated and you might need to
@@ -47,15 +61,29 @@ v0.2.0
   has value, this fixes an issue when Ansible stops with an error when there
   are no addresses set. [drybjed]
 
+- Update documentation. [drybjed]
+
+Removed
+~~~~~~~
+
 - Remove the assert check in ``debops.subnetwork/env`` and replace it with
   conditional role execution in the playbook. [drybjed]
 
-- Update documentation. [drybjed]
 
-v0.1.1
-------
+`debops.subnetwork v0.1.1`_ - 2015-06-02
+----------------------------------------
 
-*Released: 2015-06-02*
+.. _debops.subnetwork v0.1.1: https://github.com/debops/ansible-subnetwork/compare/v0.1.0...v0.1.1
+
+Added
+~~~~~
+
+- Added ``subnetwork_bridge_iface_regex`` variable to allow to use different
+  ``subnetwork_iface`` names without modifying the default
+  ``subnetwork_ifupdown_interfaces``. [ypid]
+
+Changed
+~~~~~~~
 
 - Role is updated to use new features in ``debops.ifupdown``:
 
@@ -81,14 +109,12 @@ v0.1.1
   specifies the interface from which firewall should take an IPv4 address to
   use in SNAT directive. [drybjed]
 
-- Added ``subnetwork_bridge_iface_regex`` variable to allow to use different
-  ``subnetwork_iface`` names without modifying the default
-  ``subnetwork_ifupdown_interfaces``. [ypid]
 
-v0.1.0
-------
+debops.subnetwork v0.1.0 - 2015-05-12
+-------------------------------------
 
-*Released: 2015-05-12*
+Added
+~~~~~
 
 - Add Changelog. [drybjed]
 
@@ -105,4 +131,3 @@ v0.1.0
 
   Note that dict keys must be specified explicitly, not as Jinja variables. See
   ``defaults/main.yml`` file for examples. [drybjed]
-
