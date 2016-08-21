@@ -1,9 +1,9 @@
 ---
 
 ansigenome_info:
+  galaxy_url: "https://galaxy.ansible.com/debops/subnetwork"
   github_url: "https://github.com/debops/ansible-subnetwork"
   git_branch: "master"
-  galaxy_id: "2128"
 
   travis: True
 
@@ -28,4 +28,3 @@ ansigenome_info:
     interfaces to a LAN. You can specify an IPv4 subnet and one or more
     IPv6 subnets to configure it, the role will automatically configure basic
     forwarding in any firewall and NAT for the IPv4 network.
-

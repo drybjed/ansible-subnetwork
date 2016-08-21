@@ -4,10 +4,10 @@ dependencies: []
 
 galaxy_info:
 
-  company: 'DebOps'
-  author: 'Maciej Delmanowski'
+  author: 'Maciej Delmanowski, Robin Schneider'
   description: 'Configure LAN with IPv4/NAT and IPv6 network support'
-  license: 'GNU General Public License v3'
+  company: 'DebOps'
+  license: 'GPL-3.0'
   min_ansible_version: '2.0.0'
 
   platforms:
@@ -26,5 +26,5 @@ galaxy_info:
         - jessie
 
   galaxy_tags:
-  - system
-  - networking
+    - system
+    - networking
