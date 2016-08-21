@@ -12,9 +12,15 @@ The current repository maintainer is drybjed_.
 
 
 `debops.subnetwork master`_ - unreleased
--------------------------------------
+----------------------------------------
 
 .. _debops.subnetwork master: https://github.com/debops/ansible-subnetwork/compare/v0.2.0...master
+
+Fixed
+~~~~~
+
+- Support to configure IPv6 addresses on the first role run. Previously, the
+  role needed a second Ansible run for that. [ypid_]
 
 
 `debops.subnetwork v0.2.0`_ - 2016-03-23

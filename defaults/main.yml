@@ -78,7 +78,7 @@ subnetwork__ipv4_nat_masquerade: True
 # .. envvar:: subnetwork__ipv4_nat_snat_interface
 #
 # Network interface used as a source for outgoing IPv4 connections from NAT.
-subnetwork__ipv4_nat_snat_interface: '{{ ansible_default_ipv4.interface | default("") }}'
+subnetwork__ipv4_nat_snat_interface: '{{ ansible_default_ipv4.interface | d("") }}'
 
 
 # .. envvar:: subnetwork__options
@@ -93,6 +93,17 @@ subnetwork__options: |
 # IPv6 network options
 subnetwork__options6: |
   pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork__iface }}/accept_dad
+
+
+# .. envvar:: subnetwork__force
+#
+# Force ``debops.ifupdown`` to configure the IPv6 addresses even when the
+# interface is not yet recognized as active.
+# This is needed because the ``debops.ifupdown`` role checks the interface
+# state using Ansible facts but the two elements in
+# :envvar:`subnetwork__ifupdown__dependent_list` get configured in the same
+# task.
+subnetwork__force: True
 
 # .. )))
 
@@ -126,6 +137,7 @@ subnetwork__ifupdown__dependent_list:
     weight: '70'
     auto: False
     allow: False
+    force: '{{ ssubnetwork__force|bool }}'
     options: '{{ subnetwork__options6 }}'
 
 
