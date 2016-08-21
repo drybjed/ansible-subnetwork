@@ -28,27 +28,8 @@ address of the subnetwork interface and prefix is the CIDR subnet size:
 Example playbook
 ----------------
 
-Here's an example playbook that can be used to configure local networks::
+If you are using this role without DebOps, here's an example Ansible playbook
+that uses the ``debops.subnetwork`` role:
 
-    ---
-
-    - name: Configure internal networks
-      hosts: [ 'debops_service_subnetwork', 'debops_subnetwork' ]
-      become: True
-
-      roles:
-
-        - role: debops.ifupdown
-          tags: [ 'role::ifupdown' ]
-          ifupdown_dependent_interfaces: '{{ subnetwork__ifupdown__dependent_list }}'
-          when: subnetwork__addresses
-
-        - role: debops.ferm
-          tags: [ 'role::ferm' ]
-          ferm_forward: '{{ subnetwork__kernel_forwarding|d() | bool }}'
-          ferm_dependent_rules:
-            - '{{ subnetwork__ferm__dependent_rules if subnetwork__addresses else [] }}'
-
-        - role: debops.subnetwork
-          tags: [ 'role::subnetwork' ]
-
+.. literalinclude:: playbooks/subnetwork.yml
+   :language: yaml
