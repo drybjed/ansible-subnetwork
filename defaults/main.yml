@@ -68,9 +68,10 @@ subnetwork__ipv4_nat: True
 
 # .. envvar:: subnetwork__ipv4_nat_masquerade
 #
-# Should IPv4 traffic from the internal network be masqueraded? If disabled, static
-# SNAT with the default IPv4 address of the gateway will be configured instead.
-# Leave it True if you use a laptop or change networks frequently.
+# Should IPv4 traffic from the internal network be masqueraded? If ``True``,
+# static SNAT with the default IPv4 address of the gateway will be configured
+# instead.  Leave it ``True`` if you use a laptop or change networks
+# frequently.
 subnetwork__ipv4_nat_masquerade: True
 
 
@@ -139,13 +140,12 @@ subnetwork__ferm__dependent_rules:
     role: 'subnetwork'
     name: 'filter_forward'
     rules: |
-      # Forward host connections to the outside world
+      # Forward host connections to the outside world.
       domain $domains table filter chain FORWARD {
         interface {{ subnetwork__iface }} ACCEPT;
         outerface {{ subnetwork__iface }} ACCEPT;
       }
-    when: '{{ subnetwork__forwarding|d() | bool }}'
-    delete: '{{ not (subnetwork__forwarding|d() | bool) }}'
+    rule_state: '{{ subnetwork__forwarding|d() | bool | ternary("present", "absent")  }}'
 
   - type: 'custom'
     weight: '50'
@@ -154,7 +154,7 @@ subnetwork__ferm__dependent_rules:
     rules: |
       {% if subnetwork__addresses %}
       {% set subnetwork__tpl_ipv4 = subnetwork__addresses | unique | ipv4("host/prefix") %}
-      # Manage DNAT/MASQUERADE for IPv4 network
+      # Manage DNAT/MASQUERADE for IPv4 network.
       @if $ipv4_enabled {
         domain ip table nat {
           chain POSTROUTING {
@@ -168,7 +168,6 @@ subnetwork__ferm__dependent_rules:
         }
       }
       {% endif %}
-    when: '{{ ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) }}'
-    delete: '{{ not ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) }}'
+    rule_state: '{{ ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) | ternary("present", "absent")  }}'
 
 # .. )))
