@@ -105,6 +105,28 @@ subnetwork__options6: |
 # task.
 subnetwork__force: True
 
+
+# .. envvar:: subnetwork__allow_incoming_connections
+#
+# Should the Firewall allow and forward connections which are initiated from
+# outside of the configured network?
+subnetwork__allow_incoming_connections: False
+
+
+# .. envvar:: subnetwork__allow_incoming_interfaces
+#
+# From which interfaces should connections be be forwarded to the
+# subnetwork? By default all interfaces are allowed if
+# :envvar:`subnetwork__allow_incoming_connections` is ``True``.
+subnetwork__allow_incoming_interfaces: []
+
+
+# .. envvar:: subnetwork__allow_outgoing_interfaces
+#
+# To which interfaces should connections be allowed to which are initiated from
+# within the subnetwork? By default all interfaces are allowed.
+subnetwork__allow_outgoing_interfaces: []
+
 # .. )))
 
 # .. Role-dependent configuration (((
@@ -137,7 +159,7 @@ subnetwork__ifupdown__dependent_list:
     weight: '70'
     auto: False
     allow: False
-    force: '{{ ssubnetwork__force|bool }}'
+    force: '{{ subnetwork__force|bool }}'
     options: '{{ subnetwork__options6 }}'
 
 
@@ -147,21 +169,32 @@ subnetwork__ifupdown__dependent_list:
 # ``debops.ferm`` role is used to configure Apt-Cacher NG firewall rules.
 subnetwork__ferm__dependent_rules:
 
-  - type: 'custom'
+  - chain: 'FORWARD'
+    type: 'accept'
     weight: '50'
     role: 'subnetwork'
+    role_weight: '10'
     name: 'filter_forward'
-    rules: |
-      # Forward host connections to the outside world.
-      domain $domains table filter chain FORWARD {
-        interface {{ subnetwork__iface }} ACCEPT;
-        outerface {{ subnetwork__iface }} ACCEPT;
-      }
-    rule_state: '{{ subnetwork__forwarding|d() | bool | ternary("present", "absent")  }}'
+    interface: '{{ subnetwork__iface }}'
+    outerface: '{{ subnetwork__allow_outgoing_interfaces }}'
+    comment: 'Forward host connections to the outside world.'
+    rule_state: '{{ subnetwork__forwarding | bool | ternary("present", "absent")  }}'
+
+  - chain: 'FORWARD'
+    type: 'accept'
+    weight: '50'
+    role: 'subnetwork'
+    role_weight: '20'
+    name: 'filter_forward'
+    interface: '{{ subnetwork__allow_incoming_interfaces }}'
+    outerface: '{{ subnetwork__iface }}'
+    comment: 'Forward connections from the outside world to hosts within the subnetwork.'
+    rule_state: '{{ subnetwork__allow_incoming_connections | bool | ternary("present", "absent")  }}'
 
   - type: 'custom'
     weight: '50'
     role: 'subnetwork'
+    role_weight: '10'
     name: 'nat_postrouting'
     rules: |
       {% if subnetwork__addresses %}

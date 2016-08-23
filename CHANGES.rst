@@ -28,6 +28,14 @@ Fixed
 
 .. _debops.subnetwork v0.2.0: https://github.com/debops/ansible-subnetwork/compare/v0.1.1...v0.2.0
 
+Added
+~~~~~
+
+- Make the Firewall configuration more flexible for the subnetwork by
+  introducing ``subnetwork__allow_incoming_connections``,
+  ``subnetwork__allow_incoming_interfaces`` and
+  ``subnetwork__allow_outgoing_interfaces``. [ypid]
+
 Changed
 ~~~~~~~
 
