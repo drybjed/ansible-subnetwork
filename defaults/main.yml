@@ -115,7 +115,7 @@ subnetwork__allow_incoming_connections: False
 
 # .. envvar:: subnetwork__allow_incoming_interfaces
 #
-# From which interfaces should connections be be forwarded to the
+# From which interfaces should connections be forwarded to the
 # subnetwork? By default all interfaces are allowed if
 # :envvar:`subnetwork__allow_incoming_connections` is ``True``.
 subnetwork__allow_incoming_interfaces: []
@@ -123,7 +123,7 @@ subnetwork__allow_incoming_interfaces: []
 
 # .. envvar:: subnetwork__allow_outgoing_interfaces
 #
-# To which interfaces should connections be allowed to which are initiated from
+# To which interfaces should connections be allowed which are initiated from
 # within the subnetwork? By default all interfaces are allowed.
 subnetwork__allow_outgoing_interfaces: []
 
@@ -172,7 +172,7 @@ subnetwork__ferm__dependent_rules:
   - chain: 'FORWARD'
     type: 'accept'
     weight: '50'
-    role: 'subnetwork'
+    by_role: 'debops.subnetwork'
     role_weight: '10'
     name: 'filter_forward'
     interface: '{{ subnetwork__iface }}'
@@ -183,7 +183,7 @@ subnetwork__ferm__dependent_rules:
   - chain: 'FORWARD'
     type: 'accept'
     weight: '50'
-    role: 'subnetwork'
+    by_role: 'debops.subnetwork'
     role_weight: '20'
     name: 'filter_forward'
     interface: '{{ subnetwork__allow_incoming_interfaces }}'
@@ -193,7 +193,7 @@ subnetwork__ferm__dependent_rules:
 
   - type: 'custom'
     weight: '50'
-    role: 'subnetwork'
+    by_role: 'debops.subnetwork'
     role_weight: '10'
     name: 'nat_postrouting'
     rules: |
@@ -214,5 +214,28 @@ subnetwork__ferm__dependent_rules:
       }
       {% endif %}
     rule_state: '{{ ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) | ternary("present", "absent")  }}'
+
+  - chain: 'FORWARD'
+    type: 'accept'
+    weight: '50'
+    by_role: 'subnetwork'
+    role_weight: '10'
+    name: 'filter_forward'
+    rule_state: 'absent'
+
+  - chain: 'FORWARD'
+    type: 'accept'
+    weight: '50'
+    by_role: 'subnetwork'
+    role_weight: '20'
+    name: 'filter_forward'
+    rule_state: 'absent'
+
+  - type: 'custom'
+    weight: '50'
+    by_role: 'subnetwork'
+    role_weight: '10'
+    name: 'nat_postrouting'
+    rule_state: 'absent'
 
 # .. )))
