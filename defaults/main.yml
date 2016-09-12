@@ -2,6 +2,8 @@
 # Default variables
 # =================
 
+# .. include:: includes/all.rst
+#
 # .. contents:: Sections
 #    :local:
 #
@@ -51,7 +53,7 @@ subnetwork__forwarding: True
 
 # .. envvar:: subnetwork__kernel_forwarding
 #
-# Configure the IP forwarding ability via ``debops.ferm``.
+# Configure the IP forwarding ability via debops.ferm_.
 # E.g. configure IP forwarding in the Linux kernel.
 subnetwork__kernel_forwarding: '{{ True
                                    if subnetwork__addresses
@@ -97,9 +99,9 @@ subnetwork__options6: |
 
 # .. envvar:: subnetwork__force
 #
-# Force ``debops.ifupdown`` to configure the IPv6 addresses even when the
+# Force debops.ifupdown_ to configure the IPv6 addresses even when the
 # interface is not yet recognized as active.
-# This is needed because the ``debops.ifupdown`` role checks the interface
+# This is needed because the debops.ifupdown_ role checks the interface
 # state using Ansible facts but the two elements in
 # :envvar:`subnetwork__ifupdown__dependent_list` get configured in the same
 # task.
@@ -165,8 +167,8 @@ subnetwork__ifupdown__dependent_list:
 
 # .. envvar:: subnetwork__ferm__dependent_rules
 #
-# Configuration for ``debops.ferm`` firewall. It should be added when
-# ``debops.ferm`` role is used to configure Apt-Cacher NG firewall rules.
+# Configuration for debops.ferm_ firewall. It should be added when
+# debops.ferm_ role is used to configure Apt-Cacher NG firewall rules.
 subnetwork__ferm__dependent_rules:
 
   - chain: 'FORWARD'
