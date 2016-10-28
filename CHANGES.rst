@@ -14,7 +14,13 @@ The current repository maintainer is drybjed_.
 `debops.subnetwork master`_ - unreleased
 ----------------------------------------
 
-.. _debops.subnetwork master: https://github.com/debops/ansible-subnetwork/compare/v0.2.0...master
+.. _debops.subnetwork master: https://github.com/debops/ansible-subnetwork/compare/v0.2.1...master
+
+
+`debops.subnetwork v0.2.1`_ - 2016-10-28
+----------------------------------------
+
+.. _debops.subnetwork v0.2.1: https://github.com/debops/ansible-subnetwork/compare/v0.2.0...v0.2.1
 
 Fixed
 ~~~~~
