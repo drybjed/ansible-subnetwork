@@ -1,10 +1,49 @@
 Changelog
 =========
 
-v0.2.0
-------
+.. include:: includes/all.rst
 
-*Released: 2016-03-23*
+**debops.subnetwork**
+
+This project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`__
+and `human-readable changelog <http://keepachangelog.com/en/0.3.0/>`__.
+
+The current repository maintainer is drybjed_.
+
+
+`debops.subnetwork master`_ - unreleased
+----------------------------------------
+
+.. _debops.subnetwork master: https://github.com/debops/ansible-subnetwork/compare/v0.2.0...master
+
+Fixed
+~~~~~
+
+- Support to configure IPv6 addresses on the first role run. Previously, the
+  role needed a second Ansible run for that. [ypid_]
+
+
+`debops.subnetwork v0.2.0`_ - 2016-03-23
+----------------------------------------
+
+.. _debops.subnetwork v0.2.0: https://github.com/debops/ansible-subnetwork/compare/v0.1.1...v0.2.0
+
+Added
+~~~~~
+
+- Make the Firewall configuration more flexible for the subnetwork by
+  introducing :envvar:`subnetwork__allow_incoming_connections`,
+  :envvar:`subnetwork__allow_incoming_interfaces` and
+  :envvar:`subnetwork__allow_outgoing_interfaces`. [ypid_]
+
+Changed
+~~~~~~~
+
+- Renamed ``subnetwork_ifupdown_interfaces`` to
+  :envvar:`subnetwork__ifupdown__dependent_list`. [ypid_]
+
+- Use :envvar:`subnetwork__ifupdown__dependent_list` to generate Firewall entries
+  instead of templating a file under :file:`/etc/ferm`. [ypid_]
 
 - Remove most of the Ansible role dependencies, leaving only those that are
   required for the role to run correctly.
@@ -12,16 +51,7 @@ v0.2.0
   Configuration of dependent services like firewall, TCP Wrappers, APT
   preferences is set in separate default variables. These variables can be used
   by Ansible playbooks to configure settings related to ``subnetwork`` in other
-  services. [ypid]
-
-- Renamed ``subnetwork_ifupdown_interfaces`` to
-  ``subnetwork__ifupdown__dependent_list``. [ypid]
-
-- Use ``subnetwork__ifupdown__dependent_list`` to generate Firewall entries
-  instead of templating a file under :file:`/etc/ferm`. [ypid]
-
-- Added the ``debops.subnetwork/env`` role to check Ansible inventory variables
-  before starting to let dependency roles process them. [ypid]
+  services. [ypid_]
 
 - Changed namespace from ``subnetwork_`` to ``subnetwork__``.
   ``subnetwork_[^_]`` variables are hereby deprecated and you might need to
@@ -31,41 +61,55 @@ v0.2.0
 
      git ls-files -z | find -type f -print0 | xargs --null sed --in-place --regexp-extended 's/(subnetwork)_([^_])/\1__\2/g'
 
-  [ypid]
+  [ypid_]
 
-- Documented basic usage of the role. [ypid]
+- Documented basic usage of the role. [ypid_]
 
-- Enable packet forwarding through ``debops.ferm`` only when subnetwork
-  addresses are defined. [drybjed]
+- Enable packet forwarding through debops.ferm_ only when subnetwork
+  addresses are defined. [drybjed_]
 
 - Change the default ``ifupdown`` configuration "weight" to put the subnetwork
-  bridge after other bridges. [drybjed]
+  bridge after other bridges. [drybjed_]
 
-- Render the ``debops.ferm`` configuration only when ``subnetwork__addresses``
+- Render the debops.ferm_ configuration only when :envvar:`subnetwork__addresses`
   has value, this fixes an issue when Ansible stops with an error when there
-  are no addresses set. [drybjed]
+  are no addresses set. [drybjed_]
+
+- Update documentation. [drybjed_]
+
+Removed
+~~~~~~~
 
 - Remove the assert check in ``debops.subnetwork/env`` and replace it with
-  conditional role execution in the playbook. [drybjed]
+  conditional role execution in the playbook. [drybjed_]
 
-- Update documentation. [drybjed]
 
-v0.1.1
-------
+`debops.subnetwork v0.1.1`_ - 2015-06-02
+----------------------------------------
 
-*Released: 2015-06-02*
+.. _debops.subnetwork v0.1.1: https://github.com/debops/ansible-subnetwork/compare/v0.1.0...v0.1.1
 
-- Role is updated to use new features in ``debops.ifupdown``:
+Added
+~~~~~
+
+- Added ``subnetwork_bridge_iface_regex`` variable to allow to use different
+  ``subnetwork_iface`` names without modifying the default
+  ``subnetwork_ifupdown_interfaces``. [ypid_]
+
+Changed
+~~~~~~~
+
+- Role is updated to use new features in debops.ifupdown_:
 
   Most of the "logic" behind how IP addresses were configured is now included
-  in ``debops.ifupdown``. Instead of having separate variables for IPv4 and
+  in debops.ifupdown_. Instead of having separate variables for IPv4 and
   IPv6 addresses, you now should use ``subnetwork_addresses`` list to specify
   IPv4/IPv6 subnets to configure, in the "host/prefix" format.
 
-  Names of generated files in ``/etc/network/interfaces.d/`` have been changed
+  Names of generated files in :file:`/etc/network/interfaces.d/` have been changed
   to no longer contain duplicate ``_ipv4_ipv4`` or ``_ipv6_ipv6`` suffixes,
-  since ``debops.ifupdown`` automatically adds the network suffix. You need to
-  remove old configuration files from ``/etc/network/interfaces.config.d/`` to
+  since debops.ifupdown_ automatically adds the network suffix. You need to
+  remove old configuration files from :file:`/etc/network/interfaces.config.d/` to
   prevent any problems with duplicate interface configuration.
 
   ``subnetwork_ipv{4,6}_options`` variables have been renamed to
@@ -77,21 +121,19 @@ v0.1.1
   ``subnetwork_ipv4_gateway`` variable has been renamed to
   ``subnetwork_ipv4_nat_snat_interface`` to better reflect its purpose as it
   specifies the interface from which firewall should take an IPv4 address to
-  use in SNAT directive. [drybjed]
+  use in SNAT directive. [drybjed_]
 
-- Added ``subnetwork_bridge_iface_regex`` variable to allow to use different
-  ``subnetwork_iface`` names without modifying the default
-  ``subnetwork_ifupdown_interfaces``. [ypid]
 
-v0.1.0
-------
+debops.subnetwork v0.1.0 - 2015-05-12
+-------------------------------------
 
-*Released: 2015-05-12*
+Added
+~~~~~
 
-- Add Changelog. [drybjed]
+- Add Changelog. [drybjed_]
 
 - Disable automatically added ``allow-hotplug`` option in IPv6 bridge section.
-  IPv6 is enabled automatically with IPv4 when bridge is brought up. [drybjed]
+  IPv6 is enabled automatically with IPv4 when bridge is brought up. [drybjed_]
 
 - Redefine ``subnetwork_ipv{4,6}_options`` variables.
 
@@ -102,5 +144,4 @@ v0.1.0
   options.
 
   Note that dict keys must be specified explicitly, not as Jinja variables. See
-  ``defaults/main.yml`` file for examples. [drybjed]
-
+  :file:`defaults/main.yml` file for examples. [drybjed_]

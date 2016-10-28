@@ -2,6 +2,8 @@
 # Default variables
 # =================
 
+# .. include:: includes/all.rst
+#
 # .. contents:: Sections
 #    :local:
 #
@@ -51,7 +53,7 @@ subnetwork__forwarding: True
 
 # .. envvar:: subnetwork__kernel_forwarding
 #
-# Configure the IP forwarding ability via ``debops.ferm``.
+# Configure the IP forwarding ability via debops.ferm_.
 # E.g. configure IP forwarding in the Linux kernel.
 subnetwork__kernel_forwarding: '{{ True
                                    if subnetwork__addresses
@@ -68,16 +70,17 @@ subnetwork__ipv4_nat: True
 
 # .. envvar:: subnetwork__ipv4_nat_masquerade
 #
-# Should IPv4 traffic from the internal network be masqueraded? If disabled, static
-# SNAT with the default IPv4 address of the gateway will be configured instead.
-# Leave it True if you use a laptop or change networks frequently.
+# Should IPv4 traffic from the internal network be masqueraded? If ``True``,
+# static SNAT with the default IPv4 address of the gateway will be configured
+# instead.  Leave it ``True`` if you use a laptop or change networks
+# frequently.
 subnetwork__ipv4_nat_masquerade: True
 
 
 # .. envvar:: subnetwork__ipv4_nat_snat_interface
 #
 # Network interface used as a source for outgoing IPv4 connections from NAT.
-subnetwork__ipv4_nat_snat_interface: '{{ ansible_default_ipv4.interface | default("") }}'
+subnetwork__ipv4_nat_snat_interface: '{{ ansible_default_ipv4.interface | d("") }}'
 
 
 # .. envvar:: subnetwork__options
@@ -92,6 +95,39 @@ subnetwork__options: |
 # IPv6 network options
 subnetwork__options6: |
   pre-up echo 0 > /proc/sys/net/ipv6/conf/{{ subnetwork__iface }}/accept_dad
+
+
+# .. envvar:: subnetwork__force
+#
+# Force debops.ifupdown_ to configure the IPv6 addresses even when the
+# interface is not yet recognized as active.
+# This is needed because the debops.ifupdown_ role checks the interface
+# state using Ansible facts but the two elements in
+# :envvar:`subnetwork__ifupdown__dependent_list` get configured in the same
+# task.
+subnetwork__force: True
+
+
+# .. envvar:: subnetwork__allow_incoming_connections
+#
+# Should the Firewall allow and forward connections which are initiated from
+# outside of the configured network?
+subnetwork__allow_incoming_connections: False
+
+
+# .. envvar:: subnetwork__allow_incoming_interfaces
+#
+# From which interfaces should connections be forwarded to the
+# subnetwork? By default all interfaces are allowed if
+# :envvar:`subnetwork__allow_incoming_connections` is ``True``.
+subnetwork__allow_incoming_interfaces: []
+
+
+# .. envvar:: subnetwork__allow_outgoing_interfaces
+#
+# To which interfaces should connections be allowed which are initiated from
+# within the subnetwork? By default all interfaces are allowed.
+subnetwork__allow_outgoing_interfaces: []
 
 # .. )))
 
@@ -125,36 +161,47 @@ subnetwork__ifupdown__dependent_list:
     weight: '70'
     auto: False
     allow: False
+    force: '{{ subnetwork__force|bool }}'
     options: '{{ subnetwork__options6 }}'
 
 
 # .. envvar:: subnetwork__ferm__dependent_rules
 #
-# Configuration for ``debops.ferm`` firewall. It should be added when
-# ``debops.ferm`` role is used to configure Apt-Cacher NG firewall rules.
+# Configuration for debops.ferm_ firewall. It should be added when
+# debops.ferm_ role is used to configure Apt-Cacher NG firewall rules.
 subnetwork__ferm__dependent_rules:
 
-  - type: 'custom'
+  - chain: 'FORWARD'
+    type: 'accept'
     weight: '50'
-    role: 'subnetwork'
+    by_role: 'debops.subnetwork'
+    role_weight: '10'
     name: 'filter_forward'
-    rules: |
-      # Forward host connections to the outside world
-      domain $domains table filter chain FORWARD {
-        interface {{ subnetwork__iface }} ACCEPT;
-        outerface {{ subnetwork__iface }} ACCEPT;
-      }
-    when: '{{ subnetwork__forwarding|d() | bool }}'
-    delete: '{{ not (subnetwork__forwarding|d() | bool) }}'
+    interface: '{{ subnetwork__iface }}'
+    outerface: '{{ subnetwork__allow_outgoing_interfaces }}'
+    comment: 'Forward host connections to the outside world.'
+    rule_state: '{{ subnetwork__forwarding | bool | ternary("present", "absent")  }}'
+
+  - chain: 'FORWARD'
+    type: 'accept'
+    weight: '50'
+    by_role: 'debops.subnetwork'
+    role_weight: '20'
+    name: 'filter_forward'
+    interface: '{{ subnetwork__allow_incoming_interfaces }}'
+    outerface: '{{ subnetwork__iface }}'
+    comment: 'Forward connections from the outside world to hosts within the subnetwork.'
+    rule_state: '{{ subnetwork__allow_incoming_connections | bool | ternary("present", "absent")  }}'
 
   - type: 'custom'
     weight: '50'
-    role: 'subnetwork'
+    by_role: 'debops.subnetwork'
+    role_weight: '10'
     name: 'nat_postrouting'
     rules: |
       {% if subnetwork__addresses %}
       {% set subnetwork__tpl_ipv4 = subnetwork__addresses | unique | ipv4("host/prefix") %}
-      # Manage DNAT/MASQUERADE for IPv4 network
+      # Manage DNAT/MASQUERADE for IPv4 network.
       @if $ipv4_enabled {
         domain ip table nat {
           chain POSTROUTING {
@@ -168,7 +215,29 @@ subnetwork__ferm__dependent_rules:
         }
       }
       {% endif %}
-    when: '{{ ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) }}'
-    delete: '{{ not ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) }}'
+    rule_state: '{{ ((subnetwork__addresses | unique | ipv4("host/prefix")) and (subnetwork__ipv4_nat | bool)) | ternary("present", "absent")  }}'
+
+  - chain: 'FORWARD'
+    type: 'accept'
+    weight: '50'
+    by_role: 'subnetwork'
+    role_weight: '10'
+    name: 'filter_forward'
+    rule_state: 'absent'
+
+  - chain: 'FORWARD'
+    type: 'accept'
+    weight: '50'
+    by_role: 'subnetwork'
+    role_weight: '20'
+    name: 'filter_forward'
+    rule_state: 'absent'
+
+  - type: 'custom'
+    weight: '50'
+    by_role: 'subnetwork'
+    role_weight: '10'
+    name: 'nat_postrouting'
+    rule_state: 'absent'
 
 # .. )))
